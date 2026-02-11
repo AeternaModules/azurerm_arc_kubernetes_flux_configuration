@@ -7,15 +7,18 @@ resource "azurerm_arc_kubernetes_flux_configuration" "arc_kubernetes_flux_config
   continuous_reconciliation_enabled = each.value.continuous_reconciliation_enabled
   scope                             = each.value.scope
 
-  kustomizations {
-    depends_on                 = each.value.kustomizations.depends_on
-    garbage_collection_enabled = each.value.kustomizations.garbage_collection_enabled
-    name                       = each.value.kustomizations.name
-    path                       = each.value.kustomizations.path
-    recreating_enabled         = each.value.kustomizations.recreating_enabled
-    retry_interval_in_seconds  = each.value.kustomizations.retry_interval_in_seconds
-    sync_interval_in_seconds   = each.value.kustomizations.sync_interval_in_seconds
-    timeout_in_seconds         = each.value.kustomizations.timeout_in_seconds
+  dynamic "kustomizations" {
+    for_each = each.value.kustomizations
+    content {
+      depends_on                 = kustomizations.value.depends_on
+      garbage_collection_enabled = kustomizations.value.garbage_collection_enabled
+      name                       = kustomizations.value.name
+      path                       = kustomizations.value.path
+      recreating_enabled         = kustomizations.value.recreating_enabled
+      retry_interval_in_seconds  = kustomizations.value.retry_interval_in_seconds
+      sync_interval_in_seconds   = kustomizations.value.sync_interval_in_seconds
+      timeout_in_seconds         = kustomizations.value.timeout_in_seconds
+    }
   }
 
   dynamic "blob_storage" {
